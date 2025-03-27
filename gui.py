@@ -3,7 +3,7 @@ import json
 import openai
 from config import OPENAI_API_KEY
 
-openai.api_key = OPENAI_API_KEY
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Load dropdown choices from config file
 with open('./config/options.json', 'r') as file:
