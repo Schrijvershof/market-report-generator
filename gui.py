@@ -32,27 +32,33 @@ highest_market_price = st.number_input("Highest Market Price in Euro (€)", min
 # Generate report button
 if st.button("Generate Report"):
     prompt = f"""
-    You are writing a professional, business-like market report in English for our overseas producers and suppliers. For context: we are a dedicated import/export company based in Holland, selling overseas fruits across Europe to service providers and retailers with minimum volumes on a pallet basis. These reports inform our direct producers about current and expected market conditions in Europe. 
+You are writing a professional, business-like market report in English for our overseas producers and suppliers. We are an import/export company based in Holland, selling fruits across Europe to service providers and retailers. 
 
-    Create a clear and concise market report with the following data:
+Generate a clear and accurate market report using only the provided data. 
+If a field is not filled in (indicated by '-' or empty), explicitly state "Not provided" in the report. 
+Never invent or assume any missing data.
 
-    Product: {product_choice}
-    Product Specification: {product_spec}
-    Market Availability: {market_availability}
-    Price Expectation for the Coming Weeks: {price_expectation}
-    Price Indication: {price_indication}
-    Arrival Forecast: {arrival_forecast}
-    Origin Change: {origin_change}
-    Continue Shipping Advised: {shipping_advice}
-    Market Sentiment: {market_sentiment}
-    Market Quality: {market_quality}
-    Consumption: {consumption}
-    Size Preference: {size_preference}
-    Lowest Market Price in Euro: € {lowest_market_price:.2f}
-    Highest Market Price in Euro: € {highest_market_price:.2f}
+Here is the provided data:
 
-    Conclude the report with clear, professional, and actionable insights relevant to producers, without explicitly mentioning our company's role or location.
-    """
+Product: {product_choice if product_choice != '-' else 'Not provided'}
+Product Specification: {product_spec if product_spec != '-' else 'Not provided'}
+Market Availability: {market_availability if market_availability != '-' else 'Not provided'}
+Price Expectation for the Coming Weeks: {price_expectation if price_expectation != '-' else 'Not provided'}
+Price Indication: {price_indication if price_indication != '-' else 'Not provided'}
+Arrival Forecast: {arrival_forecast if arrival_forecast != '-' else 'Not provided'}
+Origin Change: {origin_change if origin_change != '-' else 'Not provided'}
+Continue Shipping Advised: {shipping_advice if shipping_advice != '-' else 'Not provided'}
+Market Sentiment: {market_sentiment if market_sentiment != '-' else 'Not provided'}
+Market Quality: {market_quality if market_quality != '-' else 'Not provided'}
+Consumption: {consumption if consumption != '-' else 'Not provided'}
+Size Preference: {size_preference if size_preference != '-' else 'Not provided'}
+Lowest Market Price in Euro: € {lowest_market_price if lowest_market_price > 0 else 'Not provided'}
+Highest Market Price in Euro: € {highest_market_price if highest_market_price > 0 else 'Not provided'}
+
+Conclude the report using only the provided data, clearly indicating if certain essential information was not provided. 
+Provide professional and actionable insights without inventing or assuming any missing data.
+"""
+
 
     with st.spinner("Generating report..."):
         response = openai.chat.completions.create(
