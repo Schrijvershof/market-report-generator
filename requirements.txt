@@ -2,3 +2,4 @@ pandas
 openai
 office365-rest-python-client
 matplotlib
+openpyxl
