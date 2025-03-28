@@ -84,10 +84,11 @@ Provide professional and actionable insights without inventing or assuming any m
         mango_df = pd.read_excel(uploaded_file, sheet_name=0)
 
         weeks = mango_df.iloc[1:32, 17].reset_index(drop=True)
-        vol_2022 = mango_df.iloc[1:32, 18].astype(float).reset_index(drop=True)
-        vol_2023 = mango_df.iloc[1:32, 19].astype(float).reset_index(drop=True)
+        vol_2022 = pd.to_numeric(mango_df.iloc[1:32, 18], errors='coerce').reset_index(drop=True)
+        vol_2023 = pd.to_numeric(mango_df.iloc[1:32, 19], errors='coerce').reset_index(drop=True)
         vol_2024 = mango_df.iloc[1:32, 20].reset_index(drop=True)
         est_flag = mango_df.iloc[1:32, 21].reset_index(drop=True)
+
 
         vol_2024_known = vol_2024[:24].astype(float)
         last_week_known = weeks[23]
