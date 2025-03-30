@@ -1,108 +1,106 @@
 {
-    "producten": [
-        "-",
-        "Mangoes",
-        "Avocados",
-        "Oranges",
-        "Lemons",
-        "Limes",
-        "Grapes",
-        "Grapefruits",
-        "Mandarins",
-        "Pomelos",
-        "Butternuts",
-        "Ginger"
-    ],
-    "product_specificatie": [
-        "-",
-        "Red seeded 8,2kg",
-        "White seeded 8,2kg",
-        "Red Seedless 8,2kg",
-        "White seedless 8,2kg",
-        "Red Seedless 10x500",
-        "White Seedless 10x500",
-        "Black Seedless 10x500",
-        "White Seedless 4,5kg",
-        "Red Seedless 4,5kg",
-        "Black Seedless 4,5kg",
-        "White seeded 4,5kg",
-        "Black seeded 4,5kg",
-        "Industry",
-        "Hass",
-        "Greenskin",
-        "Fiberless",
-        "Tommy Atkins",
-        "Navels",
-        "Valencia"
-    ],
-    "markt_beschikbaarheid": [
-        "-",
-        "None",
-        "Shortages",
-        "Limited",
-        "Okay availability",
-        "To many",
-        "Excessive"
-    ],
-    "prijs_verwachting": [
-        "-",
-        "Down",
-        "Stable",
-        "Increasing"
-    ],
-    "prijs_aanduiding": [
-        "-",
-        "Box",
-        "P/kg"
-    ],
-    "aankomst_vooruitzicht": [
-        "-",
-        "Less arrivals",
-        "Stable arrivals",
-        "More arrivals"
-    ],
-    "herkomst_verandering": [
-        "-",
-        "Yes",
-        "No"
-    ],
-    "verscheping_continuiteit_advies": [
-        "-",
-        "Yes",
-        "No"
-    ],
-    "markt_sentiment": [
-        "-",
-        "Total loss",
-        "Very poor",
-        "Poor",
-        "Moderate",
-        "Fine",
-        "Good",
-        "Fantastic"
-    ],
-    "markt_kwaliteit": [
-        "-",
-        "Very poor",
-        "Poor",
-        "Moderate",
-        "Decent",
-        "Good"
-    ],
-    "consumptie": [
-        "-",
-        "Down",
-        "Stable",
-        "Increasing"
-    ],
-    "maat_voorkeur": [
-        "-",
-        "Small",
-        "Medium",
-        "Large"
-    ]
-}
-{
+  "producten": [
+    "-",
+    "Mangoes",
+    "Avocados",
+    "Oranges",
+    "Lemons",
+    "Limes",
+    "Grapes",
+    "Grapefruits",
+    "Mandarins",
+    "Pomelos",
+    "Butternuts",
+    "Ginger"
+  ],
+  "product_specificatie": [
+    "-",
+    "Red seeded 8,2kg",
+    "White seeded 8,2kg",
+    "Red Seedless 8,2kg",
+    "White seedless 8,2kg",
+    "Red Seedless 10x500",
+    "White Seedless 10x500",
+    "Black Seedless 10x500",
+    "White Seedless 4,5kg",
+    "Red Seedless 4,5kg",
+    "Black Seedless 4,5kg",
+    "White seeded 4,5kg",
+    "Black seeded 4,5kg",
+    "Industry",
+    "Hass",
+    "Greenskin",
+    "Fiberless",
+    "Tommy Atkins",
+    "Navels",
+    "Valencia"
+  ],
+  "markt_beschikbaarheid": [
+    "-",
+    "None",
+    "Shortages",
+    "Limited",
+    "Okay availability",
+    "To many",
+    "Excessive"
+  ],
+  "prijs_verwachting": [
+    "-",
+    "Down",
+    "Stable",
+    "Increasing"
+  ],
+  "prijs_aanduiding": [
+    "-",
+    "Box",
+    "P/kg"
+  ],
+  "aankomst_vooruitzicht": [
+    "-",
+    "Less arrivals",
+    "Stable arrivals",
+    "More arrivals"
+  ],
+  "herkomst_verandering": [
+    "-",
+    "Yes",
+    "No"
+  ],
+  "verscheping_continuiteit_advies": [
+    "-",
+    "Yes",
+    "No"
+  ],
+  "markt_sentiment": [
+    "-",
+    "Total loss",
+    "Very poor",
+    "Poor",
+    "Moderate",
+    "Fine",
+    "Good",
+    "Fantastic"
+  ],
+  "markt_kwaliteit": [
+    "-",
+    "Very poor",
+    "Poor",
+    "Moderate",
+    "Decent",
+    "Good"
+  ],
+  "consumptie": [
+    "-",
+    "Down",
+    "Stable",
+    "Increasing"
+  ],
+  "maat_voorkeur": [
+    "-",
+    "Small",
+    "Medium",
+    "Large"
+  ],
   "landen_en_continenten": [
     "-",
     "Netherlands",
@@ -161,3 +159,4 @@
     "Caribbean"
   ]
 }
+
