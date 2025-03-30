@@ -31,6 +31,9 @@ size_preference = st.selectbox("Size Preference", opties["maat_voorkeur"])
 lowest_market_price = st.number_input("Lowest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
 highest_market_price = st.number_input("Highest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
 
+# Vrij tekstveld voor extra input
+extra_notes = st.text_area("Additional Observations / Notes (optional)", placeholder="Enter key observations, market dynamics, or strategic advice...")
+
 uploaded_file = None
 mango_chart_buffer = None
 
@@ -78,29 +81,46 @@ if product_choice == "Mangoes":
 
 # Genereer rapport
 if st.button("Generate Report"):
+    sections = {
+        "Product": product_choice,
+        "Product Specification": product_spec,
+        "Market Availability": market_availability,
+        "Price Expectation for the Coming Weeks": price_expectation,
+        "Price Indication": price_indication,
+        "Arrival Forecast": arrival_forecast,
+        "Origin Change": origin_change,
+        "Continue Shipping Advised": shipping_advice,
+        "Market Sentiment": market_sentiment,
+        "Market Quality": market_quality,
+        "Consumption": consumption,
+        "Size Preference": size_preference,
+        "Lowest Market Price in Euro": f"€ {lowest_market_price:.2f}" if lowest_market_price > 0 else None,
+        "Highest Market Price in Euro": f"€ {highest_market_price:.2f}" if highest_market_price > 0 else None,
+    }
+
+    report_inputs = "\n".join([f"{k}: {v}" for k, v in sections.items() if v and v != "-"])
+
+    if extra_notes.strip():
+        report_inputs = f"""IMPORTANT CONTEXT (prioritize in the report):
+
+{extra_notes.strip()}
+
+---
+
+{report_inputs}"""
+
     prompt = f"""
-You are writing a professional, business-like market report in English for our overseas producers and suppliers. We are an import/export company based in Holland, selling fruits across Europe to service providers and retailers.
+You are writing a professional, structured market report in English for international fruit producers and suppliers. The audience includes exporters, growers, and stakeholders.
 
-Generate a clear and accurate market report using only the provided data. If a field is not filled in (indicated by '-' or empty), explicitly state "Not provided" in the report. Never invent or assume any missing data.
+Guidelines:
+- ONLY use the information provided below.
+- DO NOT assume or invent any missing data.
+- Emphasize information listed under 'IMPORTANT CONTEXT'.
+- Structure the report with clarity, business tone, and actionable insights.
 
-Here is the provided data:
+Provided data:
 
-Product: {product_choice if product_choice != '-' else 'Not provided'}
-Product Specification: {product_spec if product_spec != '-' else 'Not provided'}
-Market Availability: {market_availability if market_availability != '-' else 'Not provided'}
-Price Expectation for the Coming Weeks: {price_expectation if price_expectation != '-' else 'Not provided'}
-Price Indication: {price_indication if price_indication != '-' else 'Not provided'}
-Arrival Forecast: {arrival_forecast if arrival_forecast != '-' else 'Not provided'}
-Origin Change: {origin_change if origin_change != '-' else 'Not provided'}
-Continue Shipping Advised: {shipping_advice if shipping_advice != '-' else 'Not provided'}
-Market Sentiment: {market_sentiment if market_sentiment != '-' else 'Not provided'}
-Market Quality: {market_quality if market_quality != '-' else 'Not provided'}
-Consumption: {consumption if consumption != '-' else 'Not provided'}
-Size Preference: {size_preference if size_preference != '-' else 'Not provided'}
-Lowest Market Price in Euro: € {lowest_market_price if lowest_market_price > 0 else 'Not provided'}
-Highest Market Price in Euro: € {highest_market_price if highest_market_price > 0 else 'Not provided'}
-
-Conclude the report using only the provided data, clearly indicating if certain essential information was not provided. Provide professional and actionable insights without inventing or assuming any missing data.
+{report_inputs}
 """
 
     if product_choice == "Mangoes" and mango_chart_buffer is not None:
@@ -117,6 +137,5 @@ Conclude the report using only the provided data, clearly indicating if certain 
     report = response.choices[0].message.content.strip()
     st.success("Report generated!")
     st.write(report)
-
     st.download_button("Download Report", report, "market_report.txt")
 
