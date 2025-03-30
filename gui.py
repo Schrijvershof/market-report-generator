@@ -19,22 +19,35 @@ product_choice = st.selectbox("Product", opties["producten"])
 product_spec = st.selectbox("Product Specification", opties["product_specificatie"])
 market_availability = st.selectbox("Market Availability", opties["markt_beschikbaarheid"])
 price_expectation = st.selectbox("Price Expectation", opties["prijs_verwachting"])
+
+# Prijs aanduiding + laagste prijs naast elkaar
+col_price1, col_price2 = st.columns(2)
+with col_price1:
+    price_indication = st.selectbox("Price Indication", opties["prijs_aanduiding"])
+with col_price2:
+    lowest_market_price = st.number_input("Lowest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
+
+highest_market_price = st.number_input("Highest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
+
 arrival_forecast = st.selectbox("Arrival Forecast", opties["aankomst_vooruitzicht"])
 origin_change = st.selectbox("Origin Change", opties["herkomst_verandering"])
 
-# Nieuw: invulvelden voor oorsprong wijziging
-origin_from = st.selectbox("Origin From", opties["landen_en_continenten"])
-origin_towards = st.selectbox("Origin Towards", opties["landen_en_continenten"])
+# Toon alleen bij origin_change == Yes
+if origin_change == "Yes":
+    col1, col2 = st.columns(2)
+    with col1:
+        origin_from = st.selectbox("Origin From", opties["landen_en_continenten"])
+    with col2:
+        origin_towards = st.selectbox("Origin Towards", opties["landen_en_continenten"])
+else:
+    origin_from = "-"
+    origin_towards = "-"
 
 shipping_advice = st.selectbox("Continue Shipping Advised", opties["verscheping_continuiteit_advies"])
 market_sentiment = st.selectbox("Market Sentiment", opties["markt_sentiment"])
 market_quality = st.selectbox("Market Quality", opties["markt_kwaliteit"])
 consumption = st.selectbox("Consumption", opties["consumptie"])
 size_preference = st.selectbox("Size Preference", opties["maat_voorkeur"])
-price_indication = st.selectbox("Price Indication", opties["prijs_aanduiding"])
-
-lowest_market_price = st.number_input("Lowest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
-highest_market_price = st.number_input("Highest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
 
 # Vrij tekstveld voor extra input
 extra_notes = st.text_area("Additional Observations / Notes (optional)", placeholder="Enter key observations, market dynamics, or strategic advice...")
@@ -153,4 +166,5 @@ DATA TO USE:
     st.success("Report generated!")
     st.write(report)
     st.download_button("Download Report", report, "market_report.txt")
+
 
