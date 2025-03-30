@@ -4,6 +4,10 @@ import openai
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
+import urllib.parse
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 from config import OPENAI_API_KEY
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -11,6 +15,13 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 # Laad dropdown keuzes
 with open('./config/options.json', 'r') as file:
     opties = json.load(file)
+
+# Google Sheets setup (voor e-mail export)
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
+gclient = gspread.authorize(credentials)
+subsheet = gclient.open_by_url("https://docs.google.com/spreadsheets/d/1rVeFabNieHsKQS7zLZgpwisdiAUaOZX4uQ7BsuTKTHY")
+worksheet = subsheet.sheet1
 
 st.title("Market Report Generator")
 
@@ -103,7 +114,7 @@ if st.button("Generate Report"):
         "Product": product_choice,
         "Product Specification": product_spec,
         "Market Availability": market_availability,
-        "Price Expectation for the Coming Weeks": price_expectation,
+        "Price Expectation": price_expectation,
         "Price Indication": price_indication,
         "Arrival Forecast": arrival_forecast,
         "Origin Change": origin_change,
@@ -114,14 +125,14 @@ if st.button("Generate Report"):
         "Market Quality": market_quality,
         "Consumption": consumption,
         "Size Preference": size_preference,
-        "Lowest Market Price in Euro": f"€ {lowest_market_price:.2f}" if lowest_market_price > 0 else None,
-        "Highest Market Price in Euro": f"€ {highest_market_price:.2f}" if highest_market_price > 0 else None,
+        "Lowest Market Price": f"€ {lowest_market_price:.2f}" if lowest_market_price > 0 else None,
+        "Highest Market Price": f"€ {highest_market_price:.2f}" if highest_market_price > 0 else None,
     }
 
     report_inputs = "\n".join([f"{k}: {v}" for k, v in sections.items() if v and v != "-"])
 
     if extra_notes.strip():
-        report_inputs = f"""IMPORTANT CONTEXT (use as general market background, not necessarily specific to the product):
+        report_inputs = f"""IMPORTANT CONTEXT:
 
 {extra_notes.strip()}
 
@@ -147,12 +158,8 @@ STRUCTURE OF THE REPORT:
 2. Conclusion & Advice: End with a short, strategic conclusion and professional advice to the supplier about how to proceed.
 
 DATA TO USE:
-
 {report_inputs}
 """
-
-    if product_choice == "Mangoes" and mango_chart_buffer is not None:
-        prompt += "\n\nVisual representation:\nMango shipping volumes from South America to the EU and UK per week.\nThe red dashed line represents estimated volumes for 2024/25 by Schrijvershof in weeks where actual data is not yet available."
 
     with st.spinner("Generating report..."):
         response = openai.chat.completions.create(
@@ -167,5 +174,24 @@ DATA TO USE:
     st.write(report)
     st.download_button("Download Report", report, "market_report.txt")
 
+    # 📧 Email export knop met nette e-mail layout
+    all_rows = worksheet.get_all_records()
+    bcc_emails = [row["email"] for row in all_rows if product_choice in row.get("products", "") or (product_choice in ["Oranges", "Lemons", "Mandarins", "Pomelos", "Grapefruits"] and "Citrus" in row.get("products", ""))]
+
+    if bcc_emails:
+        bcc_string = ",".join(bcc_emails)
+        subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
+        email_body = f"""
+Dear Partner,%0D%0A%0D%0A
+Please find below this week's update concerning the {product_choice.lower()} market. Should you have any questions or wish to discuss planning or expectations, feel free to contact us.%0D%0A%0D%0A
+---%0D%0A{urllib.parse.quote(report)}%0D%0A---%0D%0A%0D%0A
+Best regards,%0D%0A
+Schrijvershof Team%0D%0A%0D%0A
+Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents.
+"""
+        mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={email_body}"
+        st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
+    else:
+        st.warning("No email addresses found for this product.")
 
 
