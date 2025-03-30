@@ -187,11 +187,10 @@ Please find below this week's update concerning the {product_choice.lower()} mar
 ---%0D%0A{urllib.parse.quote(report)}%0D%0A---%0D%0A%0D%0A
 Best regards,%0D%0A
 Schrijvershof Team%0D%0A%0D%0A
-Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents.
+Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. This report is generated using artificial intelligence, based on data and insights provided by our product specialists. It may be freely shared or forwarded with others.
 """
         mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={email_body}"
         st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
     else:
         st.warning("No email addresses found for this product.")
-
 
