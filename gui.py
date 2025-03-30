@@ -21,6 +21,11 @@ market_availability = st.selectbox("Market Availability", opties["markt_beschikb
 price_expectation = st.selectbox("Price Expectation", opties["prijs_verwachting"])
 arrival_forecast = st.selectbox("Arrival Forecast", opties["aankomst_vooruitzicht"])
 origin_change = st.selectbox("Origin Change", opties["herkomst_verandering"])
+
+# Nieuw: invulvelden voor oorsprong wijziging
+origin_from = st.selectbox("Origin From", opties["landen_en_continenten"])
+origin_towards = st.selectbox("Origin Towards", opties["landen_en_continenten"])
+
 shipping_advice = st.selectbox("Continue Shipping Advised", opties["verscheping_continuiteit_advies"])
 market_sentiment = st.selectbox("Market Sentiment", opties["markt_sentiment"])
 market_quality = st.selectbox("Market Quality", opties["markt_kwaliteit"])
@@ -89,6 +94,8 @@ if st.button("Generate Report"):
         "Price Indication": price_indication,
         "Arrival Forecast": arrival_forecast,
         "Origin Change": origin_change,
+        "Origin From": origin_from,
+        "Origin Towards": origin_towards,
         "Continue Shipping Advised": shipping_advice,
         "Market Sentiment": market_sentiment,
         "Market Quality": market_quality,
@@ -117,13 +124,14 @@ IMPORTANT:
 - The report should speak from the perspective of the importer, summarizing the current situation in Europe.
 - Use simple, direct, and neutral English. Avoid overly formal or technical language.
 - The audience does not speak English as their first language.
-- The report must reflect a delay in logistics: decisions made today by suppliers will affect European markets in 2-3 weeks.
+- Avoid repeating well-known industry facts such as common logistical delays.
 - Do not assign blame or agency to specific parties (e.g. "suppliers", "exporters") unless stated.
 - Any additional notes provided are general observations and should not be overly tied to the product (e.g., mangoes), unless it clearly is.
+- A change in origin is not absolute; multiple countries may still be in supply simultaneously.
 
 STRUCTURE OF THE REPORT:
 1. Summary: Start with a clear overview of the current market situation based on all filled-in form fields (in order of appearance).
-2. Conclusion & Advice: End with a short, strategic conclusion and professional advice to the supplier about how to proceed, considering the time delay between packing and arrival in Europe.
+2. Conclusion & Advice: End with a short, strategic conclusion and professional advice to the supplier about how to proceed.
 
 DATA TO USE:
 
@@ -145,3 +153,4 @@ DATA TO USE:
     st.success("Report generated!")
     st.write(report)
     st.download_button("Download Report", report, "market_report.txt")
+
