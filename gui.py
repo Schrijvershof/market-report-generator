@@ -101,7 +101,7 @@ if st.button("Generate Report"):
     report_inputs = "\n".join([f"{k}: {v}" for k, v in sections.items() if v and v != "-"])
 
     if extra_notes.strip():
-        report_inputs = f"""IMPORTANT CONTEXT (prioritize in the report):
+        report_inputs = f"""IMPORTANT CONTEXT (use as general market background, not necessarily specific to the product):
 
 {extra_notes.strip()}
 
@@ -110,15 +110,22 @@ if st.button("Generate Report"):
 {report_inputs}"""
 
     prompt = f"""
-You are writing a professional, structured market report in English for international fruit producers and suppliers. The audience includes exporters, growers, and stakeholders.
+You are assisting a Dutch fruit importing company in writing a weekly market update for overseas producers and exporters. These reports are used to inform and advise suppliers in countries like Brazil, Peru, and South Africa. The fruits are imported into Europe and sold mainly to service providers who handle ripening, packing, and delivery to retail.
 
-Guidelines:
-- ONLY use the information provided below.
-- DO NOT assume or invent any missing data.
-- Emphasize information listed under 'IMPORTANT CONTEXT'.
-- Structure the report with clarity, business tone, and actionable insights.
+IMPORTANT:
+- Do NOT assume that the suppliers are currently taking actions unless clearly stated.
+- The report should speak from the perspective of the importer, summarizing the current situation in Europe.
+- Use simple, direct, and neutral English. Avoid overly formal or technical language.
+- The audience does not speak English as their first language.
+- The report must reflect a delay in logistics: decisions made today by suppliers will affect European markets in 2-3 weeks.
+- Do not assign blame or agency to specific parties (e.g. "suppliers", "exporters") unless stated.
+- Any additional notes provided are general observations and should not be overly tied to the product (e.g., mangoes), unless it clearly is.
 
-Provided data:
+STRUCTURE OF THE REPORT:
+1. Summary: Start with a clear overview of the current market situation based on all filled-in form fields (in order of appearance).
+2. Conclusion & Advice: End with a short, strategic conclusion and professional advice to the supplier about how to proceed, considering the time delay between packing and arrival in Europe.
+
+DATA TO USE:
 
 {report_inputs}
 """
@@ -138,4 +145,3 @@ Provided data:
     st.success("Report generated!")
     st.write(report)
     st.download_button("Download Report", report, "market_report.txt")
-
