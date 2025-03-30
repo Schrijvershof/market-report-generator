@@ -115,6 +115,7 @@ if st.button("Generate Report"):
     base_info = "
 ".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
 
+
     segment_info = ""
     if st.session_state.segments:
         segment_info = "
