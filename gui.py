@@ -27,11 +27,42 @@ st.title("Market Report Generator")
 
 # UI-keuzes
 product_choice = st.selectbox("Product", opties["producten"])
+
+# Speciale tabel voor druiven en citrus
+multi_entries = []
+if product_choice in ["Grapes", "Citrus"]:
+    st.markdown("### Market Segments")
+    if "segments" not in st.session_state:
+        st.session_state.segments = []
+
+    with st.form("segment_form"):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            variety = st.text_input("Variety/Color")
+        with col2:
+            origin = st.selectbox("Origin", opties["landen_en_continenten"])
+        with col3:
+            note = st.text_area("Market Note")
+
+        submitted = st.form_submit_button("Add Segment")
+        if submitted and variety and origin and note:
+            st.session_state.segments.append({"variety": variety, "origin": origin, "note": note})
+
+    if st.session_state.segments:
+        st.markdown("#### Added Market Segments")
+        for idx, entry in enumerate(st.session_state.segments):
+            st.markdown(f"**{entry['variety']}** from *{entry['origin']}*  → {entry['note']}")
+            if st.button(f"Remove {entry['variety']} - {entry['origin']}", key=f"del_{idx}"):
+                st.session_state.segments.pop(idx)
+                st.experimental_rerun()
+else:
+    st.session_state.segments = []
+
+# Extra rapportdata ophalen
 product_spec = st.selectbox("Product Specification", opties["product_specificatie"])
 market_availability = st.selectbox("Market Availability", opties["markt_beschikbaarheid"])
 price_expectation = st.selectbox("Price Expectation", opties["prijs_verwachting"])
 
-# Prijs indicatie en prijswaarden in één regel
 col_price1, col_price2, col_price3 = st.columns(3)
 with col_price1:
     price_indication = st.selectbox("Price Indication", opties["prijs_aanduiding"])
@@ -43,7 +74,6 @@ with col_price3:
 arrival_forecast = st.selectbox("Arrival Forecast", opties["aankomst_vooruitzicht"])
 origin_change = st.selectbox("Origin Change", opties["herkomst_verandering"])
 
-# Toon alleen bij origin_change == Yes
 if origin_change == "Yes":
     col1, col2 = st.columns(2)
     with col1:
@@ -59,58 +89,11 @@ market_sentiment = st.selectbox("Market Sentiment", opties["markt_sentiment"])
 market_quality = st.selectbox("Market Quality", opties["markt_kwaliteit"])
 consumption = st.selectbox("Consumption", opties["consumptie"])
 size_preference = st.selectbox("Size Preference", opties["maat_voorkeur"])
-
-# Vrij tekstveld voor extra input
 extra_notes = st.text_area("Additional Observations / Notes (optional)", placeholder="Enter key observations, market dynamics, or strategic advice...")
 
-uploaded_file = None
-mango_chart_buffer = None
-
-if product_choice == "Mangoes":
-    st.markdown("---")
-    st.subheader("Mango Volumes Upload (Excel)")
-    uploaded_file = st.file_uploader("Upload mango volume Excel", type=["xlsx"])
-
-    if uploaded_file:
-        df = pd.read_excel(uploaded_file)
-        weeks = df.iloc[1:, 18].astype(str).reset_index(drop=True)
-        vol_2022 = pd.to_numeric(df.iloc[1:, 19], errors='coerce').reset_index(drop=True)
-        vol_2023 = pd.to_numeric(df.iloc[1:, 20], errors='coerce').reset_index(drop=True)
-        vol_2024 = pd.to_numeric(df.iloc[1:, 21], errors='coerce').reset_index(drop=True)
-        estimations = pd.to_numeric(df.iloc[1:, 22], errors='coerce').reset_index(drop=True)
-
-        mask = vol_2024.isna() & estimations.notna()
-        estimation_weeks = [w for w, m in zip(weeks, mask) if m]
-        estimation_vals = estimations[mask].tolist()
-
-        last_known_index = vol_2024.last_valid_index()
-        if last_known_index is not None:
-            estimation_weeks = [weeks[last_known_index]] + estimation_weeks
-            estimation_vals = [vol_2024[last_known_index]] + estimation_vals
-
-        fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(weeks, vol_2022, label="2022/23", marker="o")
-        ax.plot(weeks, vol_2023, label="2023/24", marker="o")
-        ax.plot(weeks, vol_2024, label="2024/25 (actual)", marker="o", color="tab:red")
-
-        if len(estimation_weeks) > 1:
-            ax.plot(estimation_weeks, estimation_vals, label="2024/25 (estimation)", linestyle="--", marker="o", color="tab:red", alpha=0.6)
-
-        ax.set_title("Mango Departures from South America to EU+UK (Weekly)")
-        ax.set_xlabel("Week")
-        ax.set_ylabel("Volume")
-        ax.legend()
-        ax.grid(True)
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-
-        mango_chart_buffer = io.BytesIO()
-        plt.savefig(mango_chart_buffer, format='png')
-        st.image(mango_chart_buffer)
-
-# Genereer rapport
 if st.button("Generate Report"):
-    sections = {
+
+    general_inputs = {
         "Product": product_choice,
         "Product Specification": product_spec,
         "Market Availability": market_availability,
@@ -125,22 +108,36 @@ if st.button("Generate Report"):
         "Market Quality": market_quality,
         "Consumption": consumption,
         "Size Preference": size_preference,
-        "Lowest Market Price": f"€ {lowest_market_price:.2f}" if lowest_market_price > 0 else None,
-        "Highest Market Price": f"€ {highest_market_price:.2f}" if highest_market_price > 0 else None,
+        "Lowest Market Price": f"€ {lowest_market_price:.2f}" if lowest_market_price > 0 else "-",
+        "Highest Market Price": f"€ {highest_market_price:.2f}" if highest_market_price > 0 else "-",
     }
 
-    report_inputs = "\n".join([f"{k}: {v}" for k, v in sections.items() if v and v != "-"])
+    base_info = "
+".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
+
+    segment_info = ""
+    if st.session_state.segments:
+        segment_info = "
+
+MARKET SEGMENTS:
+"
+        for seg in st.session_state.segments:
+            segment_info += f"- {seg['variety']} from {seg['origin']}: {seg['note']}
+"
 
     if extra_notes.strip():
-        report_inputs = f"""IMPORTANT CONTEXT:
-
+        base_info = f"GENERAL CONTEXT:
 {extra_notes.strip()}
 
 ---
 
-{report_inputs}"""
+" + base_info
 
-    prompt = f"""
+    report_inputs = f"{segment_info}
+
+{base_info}"
+
+    prompt = f'''
 You are assisting a Dutch fruit importing company in writing a weekly market update for overseas producers and exporters. These reports are used to inform and advise suppliers in countries like Brazil, Peru, and South Africa. The fruits are imported into Europe and sold mainly to service providers who handle ripening, packing, and delivery to retail.
 
 IMPORTANT:
@@ -159,14 +156,14 @@ STRUCTURE OF THE REPORT:
 
 DATA TO USE:
 {report_inputs}
-"""
+    '''
 
     with st.spinner("Generating report..."):
         response = openai.chat.completions.create(
             model="gpt-4-turbo",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=800
+            max_tokens=1000
         )
 
     report = response.choices[0].message.content.strip()
@@ -174,7 +171,7 @@ DATA TO USE:
     st.write(report)
     st.download_button("Download Report", report, "market_report.txt")
 
-    # 📧 Email export knop met nette e-mail layout
+    # Email genereren
     all_rows = worksheet.get_all_records()
     bcc_emails = [row["email"] for row in all_rows if product_choice in row.get("products", "") or (product_choice in ["Oranges", "Lemons", "Mandarins", "Pomelos", "Grapefruits"] and "Citrus" in row.get("products", ""))]
 
@@ -193,4 +190,4 @@ Disclaimer: This report is based on best available internal and external informa
         st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
     else:
         st.warning("No email addresses found for this product.")
-
+# die we nu verder zullen integreren met de segment-data
