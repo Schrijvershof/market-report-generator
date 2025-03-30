@@ -20,14 +20,14 @@ product_spec = st.selectbox("Product Specification", opties["product_specificati
 market_availability = st.selectbox("Market Availability", opties["markt_beschikbaarheid"])
 price_expectation = st.selectbox("Price Expectation", opties["prijs_verwachting"])
 
-# Prijs aanduiding + laagste prijs naast elkaar
-col_price1, col_price2 = st.columns(2)
+# Prijs indicatie en prijswaarden in één regel
+col_price1, col_price2, col_price3 = st.columns(3)
 with col_price1:
     price_indication = st.selectbox("Price Indication", opties["prijs_aanduiding"])
 with col_price2:
     lowest_market_price = st.number_input("Lowest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
-
-highest_market_price = st.number_input("Highest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
+with col_price3:
+    highest_market_price = st.number_input("Highest Market Price in Euro (€)", min_value=0.0, step=0.1, format="%.2f")
 
 arrival_forecast = st.selectbox("Arrival Forecast", opties["aankomst_vooruitzicht"])
 origin_change = st.selectbox("Origin Change", opties["herkomst_verandering"])
@@ -166,5 +166,6 @@ DATA TO USE:
     st.success("Report generated!")
     st.write(report)
     st.download_button("Download Report", report, "market_report.txt")
+
 
 
