@@ -3,3 +3,5 @@ openai
 office365-rest-python-client
 matplotlib
 openpyxl
+gspread
+oauth2client
