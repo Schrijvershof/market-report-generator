@@ -138,13 +138,12 @@ IMPORTANT:
 - Do not assign blame or agency to specific parties (e.g. "suppliers", "exporters") unless stated.
 - Any additional notes provided are general observations and should not be overly tied to the product (e.g., mangoes), unless it clearly is.
 - A change in origin is not absolute; multiple countries may still be in supply simultaneously.
-- Do not state or imply that one origin is primary unless this is explicitly stated.
-- Do not advise suppliers to adjust size or variety preferences based solely on the current market, especially if an origin change is coming. Mention the uncertainty instead.
 
 RULES:
 - Do not fabricate any data. Use only the fields that were actually filled in.
 - If all fields are empty or set to '-', respond with: "No data was provided. No report can be generated."
 - Do not assume product, origin, or market segments unless they were explicitly selected.
+- If origin is changing soon, avoid giving firm advice about sizing or pricing that could change.
 
 STRUCTURE OF THE REPORT:
 1. Summary: Start with a clear overview of the current market situation based on all filled-in form fields (in order of appearance).
@@ -198,12 +197,9 @@ Content-Type: text/html
 {html_body}"""
 
             eml_bytes = eml_content.encode("utf-8")
-            st.download_button("\ud83d\udce9 Download Outlook Email (.eml)", data=eml_bytes, file_name="market_report.eml", mime="message/rfc822")
+            st.download_button("Download Outlook Email (.eml)", data=eml_bytes, file_name="market_report.eml", mime="message/rfc822")
 
             mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(report)}"
-            st.markdown(f"[\ud83d\udce7 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
+            st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
         else:
             st.warning("No email addresses found for this product.")
-        st.success("Final report ready!")
-        st.write(final_report)
-        st.download_button("Download Report", final_report, "market_report.txt")
