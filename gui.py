@@ -112,7 +112,7 @@ if st.button("Generate Report"):
         "Highest Market Price": f"€ {highest_market_price:.2f}" if highest_market_price > 0 else "-",
     }
 
-    base_info = "
+base_info = "\n".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
 ".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
 
 
