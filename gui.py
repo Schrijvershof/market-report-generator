@@ -158,28 +158,26 @@ DATA TO USE:
                 max_tokens=1000
             )
 
-        report = gen_response.choices[0].message.content.strip()
+        initial_report = gen_response.choices[0].message.content.strip()
 
-        # AI Review Prompt
         review_prompt = f'''
-You are an AI reviewer. Your job is to check whether the following market report matches the instructions and data that were given. If it does not, return an improved version that better reflects the input and prompt. Otherwise, return the same report unchanged.
+Act as a fact-checking assistant. Compare the report to the original prompt and input. If the report includes incorrect facts, makes assumptions not backed by the input, or misrepresents the data, then correct only those parts. Do not shorten or reword for style — only fix factual mismatches.
 
---- BEGIN PROMPT ---
+PROMPT:
 {prompt.strip()}
---- END PROMPT ---
 
---- BEGIN GENERATED REPORT ---
-{report}
---- END GENERATED REPORT ---
+--- GENERATED REPORT ---
+{initial_report}
+--- END REPORT ---
 
-Does the report fully align with the prompt and the data? If not, improve it directly.
+Your task: return the corrected report, if needed.
 '''
 
-        with st.spinner("Reviewing for consistency..."):
+        with st.spinner("Reviewing report for factual consistency..."):
             review_response = openai.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[{"role": "user", "content": review_prompt}],
-                temperature=0.3,
+                temperature=0.2,
                 max_tokens=1200
             )
 
@@ -188,41 +186,3 @@ Does the report fully align with the prompt and the data? If not, improve it dir
         st.success("Final report ready!")
         st.write(final_report)
         st.download_button("Download Report", final_report, "market_report.txt")
-
-        all_rows = worksheet.get_all_records()
-        bcc_emails = [row["email"] for row in all_rows if product_choice in row.get("products", "") or (product_choice in ["Oranges", "Lemons", "Mandarins", "Pomelos", "Grapefruits"] and "Citrus" in row.get("products", ""))]
-
-        if bcc_emails:
-            bcc_string = ",".join(bcc_emails)
-            subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
-            html_body = f"""
-            <html>
-            <body>
-            <p>Dear Partner,<br><br>
-            Please find below this week's update concerning the <b>{product_choice.lower()}</b> market.<br>
-            Should you have any questions or wish to discuss planning or expectations, feel free to contact us.<br><br>
-            ---<br>
-            <pre>{final_report}</pre><br>
-            ---<br><br>
-            Best regards,<br>
-            <b>Schrijvershof Team</b><br><br>
-            <i>Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. This report is generated using artificial intelligence, based on data and insights provided by our product specialists. It may be freely shared or forwarded with others.</i>
-            </p>
-            </body>
-            </html>
-            """
-
-            eml_content = f"""Subject: {subject}
-BCC: {bcc_string}
-Content-Type: text/html
-
-{html_body}"""
-
-            eml_bytes = eml_content.encode("utf-8")
-            st.download_button("📩 Download Outlook Email (.eml)", data=eml_bytes, file_name="market_report.eml", mime="message/rfc822")
-
-            mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(final_report)}"
-            st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
-        else:
-            st.warning("No email addresses found for this product.")
-
