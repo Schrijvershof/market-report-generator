@@ -25,10 +25,8 @@ worksheet = subsheet.sheet1
 
 st.title("Market Report Generator")
 
-# UI-keuzes
 product_choice = st.selectbox("Product", opties["producten"])
 
-# Speciale tabel voor druiven en citrus
 multi_entries = []
 if product_choice in ["Grapes", "Citrus"]:
     st.markdown("### Market Segments")
@@ -58,7 +56,6 @@ if product_choice in ["Grapes", "Citrus"]:
 else:
     st.session_state.segments = []
 
-# Extra rapportdata ophalen
 product_spec = st.selectbox("Product Specification", opties["product_specificatie"])
 market_availability = st.selectbox("Market Availability", opties["markt_beschikbaarheid"])
 price_expectation = st.selectbox("Price Expectation", opties["prijs_verwachting"])
@@ -159,22 +156,40 @@ DATA TO USE:
     st.write(report)
     st.download_button("Download Report", report, "market_report.txt")
 
-    # Email genereren
     all_rows = worksheet.get_all_records()
     bcc_emails = [row["email"] for row in all_rows if product_choice in row.get("products", "") or (product_choice in ["Oranges", "Lemons", "Mandarins", "Pomelos", "Grapefruits"] and "Citrus" in row.get("products", ""))]
 
     if bcc_emails:
         bcc_string = ",".join(bcc_emails)
         subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
-        email_body = f"""
-Dear Partner,%0D%0A%0D%0A
-Please find below this week's update concerning the {product_choice.lower()} market. Should you have any questions or wish to discuss planning or expectations, feel free to contact us.%0D%0A%0D%0A
----%0D%0A{urllib.parse.quote(report)}%0D%0A---%0D%0A%0D%0A
-Best regards,%0D%0A
-Schrijvershof Team%0D%0A%0D%0A
-Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. This report is generated using artificial intelligence, based on data and insights provided by our product specialists. It may be freely shared or forwarded with others.
-"""
-        mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={email_body}"
+        html_body = f"""
+        <html>
+        <body>
+        <p>Dear Partner,<br><br>
+        Please find below this week's update concerning the <b>{product_choice.lower()}</b> market.<br>
+        Should you have any questions or wish to discuss planning or expectations, feel free to contact us.<br><br>
+        ---<br>
+        <pre>{report}</pre><br>
+        ---<br><br>
+        Best regards,<br>
+        <b>Schrijvershof Team</b><br><br>
+        <i>Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. This report is generated using artificial intelligence, based on data and insights provided by our product specialists. It may be freely shared or forwarded with others.</i>
+        </p>
+        </body>
+        </html>
+        """
+
+        eml_content = f"""Subject: {subject}
+BCC: {bcc_string}
+Content-Type: text/html
+
+{html_body}"""
+
+        eml_bytes = eml_content.encode("utf-8")
+        st.download_button("📩 Download Outlook Email (.eml)", data=eml_bytes, file_name="market_report.eml", mime="message/rfc822")
+
+        mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(report)}"
         st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
     else:
         st.warning("No email addresses found for this product.")
+
