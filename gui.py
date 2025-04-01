@@ -89,6 +89,7 @@ size_preference = st.selectbox("Size Preference", opties["maat_voorkeur"])
 extra_notes = st.text_area("Additional Observations / Notes (optional)", placeholder="Enter key observations, market dynamics, or strategic advice...")
 
 if st.button("Generate Report"):
+
     general_inputs = {
         "Product": product_choice,
         "Product Specification": product_spec,
@@ -124,6 +125,7 @@ if st.button("Generate Report"):
 
         report_inputs = f"{segment_info}\n\n{base_info}"
 
+        # --- BEGIN AI PROMPT (FIXED FORMAT) ---
         prompt = f'''
 You are assisting a Dutch fruit importing company in writing a weekly market update for overseas producers and exporters. These reports are used to inform and advise suppliers in countries like Brazil, Peru, and South Africa. The fruits are imported into Europe and sold mainly to service providers who handle ripening, packing, and delivery to retail.
 
@@ -136,6 +138,8 @@ IMPORTANT:
 - Do not assign blame or agency to specific parties (e.g. "suppliers", "exporters") unless stated.
 - Any additional notes provided are general observations and should not be overly tied to the product (e.g., mangoes), unless it clearly is.
 - A change in origin is not absolute; multiple countries may still be in supply simultaneously.
+- Do not state or imply that one origin is primary unless this is explicitly stated.
+- Do not advise suppliers to adjust size or variety preferences based solely on the current market, especially if an origin change is coming. Mention the uncertainty instead.
 
 RULES:
 - Do not fabricate any data. Use only the fields that were actually filled in.
@@ -148,41 +152,58 @@ STRUCTURE OF THE REPORT:
 
 DATA TO USE:
 {report_inputs}
-'''
+        '''
+        # --- END AI PROMPT ---
 
         with st.spinner("Generating report..."):
-            gen_response = openai.chat.completions.create(
+            response = openai.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7,
                 max_tokens=1000
             )
 
-        initial_report = gen_response.choices[0].message.content.strip()
+        report = response.choices[0].message.content.strip()
+        st.success("Report generated!")
+        st.write(report)
+        st.download_button("Download Report", report, "market_report.txt")
 
-        review_prompt = f'''
-Act as a fact-checking assistant. Compare the report to the original prompt and input. If the report includes incorrect facts, makes assumptions not backed by the input, or misrepresents the data, then correct only those parts. Do not shorten or reword for style — only fix factual mismatches.
+        all_rows = worksheet.get_all_records()
+        bcc_emails = [row["email"] for row in all_rows if product_choice in row.get("products", "") or (product_choice in ["Oranges", "Lemons", "Mandarins", "Pomelos", "Grapefruits"] and "Citrus" in row.get("products", ""))]
 
-PROMPT:
-{prompt.strip()}
+        if bcc_emails:
+            bcc_string = ",".join(bcc_emails)
+            subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
+            html_body = f"""
+            <html>
+            <body>
+            <p>Dear Partner,<br><br>
+            Please find below this week's update concerning the <b>{product_choice.lower()}</b> market.<br>
+            Should you have any questions or wish to discuss planning or expectations, feel free to contact us.<br><br>
+            ---<br>
+            <pre>{report}</pre><br>
+            ---<br><br>
+            Best regards,<br>
+            <b>Schrijvershof Team</b><br><br>
+            <i>Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. This report is generated using artificial intelligence, based on data and insights provided by our product specialists. It may be freely shared or forwarded with others.</i>
+            </p>
+            </body>
+            </html>
+            """
 
---- GENERATED REPORT ---
-{initial_report}
---- END REPORT ---
+            eml_content = f"""Subject: {subject}
+BCC: {bcc_string}
+Content-Type: text/html
 
-Your task: return the corrected report, if needed.
-'''
+{html_body}"""
 
-        with st.spinner("Reviewing report for factual consistency..."):
-            review_response = openai.chat.completions.create(
-                model="gpt-4-turbo",
-                messages=[{"role": "user", "content": review_prompt}],
-                temperature=0.2,
-                max_tokens=1200
-            )
+            eml_bytes = eml_content.encode("utf-8")
+            st.download_button("\ud83d\udce9 Download Outlook Email (.eml)", data=eml_bytes, file_name="market_report.eml", mime="message/rfc822")
 
-        final_report = review_response.choices[0].message.content.strip()
-
+            mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(report)}"
+            st.markdown(f"[\ud83d\udce7 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
+        else:
+            st.warning("No email addresses found for this product.")
         st.success("Final report ready!")
         st.write(final_report)
         st.download_button("Download Report", final_report, "market_report.txt")
