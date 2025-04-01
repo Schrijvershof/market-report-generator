@@ -89,7 +89,6 @@ size_preference = st.selectbox("Size Preference", opties["maat_voorkeur"])
 extra_notes = st.text_area("Additional Observations / Notes (optional)", placeholder="Enter key observations, market dynamics, or strategic advice...")
 
 if st.button("Generate Report"):
-
     general_inputs = {
         "Product": product_choice,
         "Product Specification": product_spec,
@@ -149,20 +148,46 @@ STRUCTURE OF THE REPORT:
 
 DATA TO USE:
 {report_inputs}
-        '''
+'''
 
         with st.spinner("Generating report..."):
-            response = openai.chat.completions.create(
+            gen_response = openai.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7,
                 max_tokens=1000
             )
 
-        report = response.choices[0].message.content.strip()
-        st.success("Report generated!")
-        st.write(report)
-        st.download_button("Download Report", report, "market_report.txt")
+        report = gen_response.choices[0].message.content.strip()
+
+        # AI Review Prompt
+        review_prompt = f'''
+You are an AI reviewer. Your job is to check whether the following market report matches the instructions and data that were given. If it does not, return an improved version that better reflects the input and prompt. Otherwise, return the same report unchanged.
+
+--- BEGIN PROMPT ---
+{prompt.strip()}
+--- END PROMPT ---
+
+--- BEGIN GENERATED REPORT ---
+{report}
+--- END GENERATED REPORT ---
+
+Does the report fully align with the prompt and the data? If not, improve it directly.
+'''
+
+        with st.spinner("Reviewing for consistency..."):
+            review_response = openai.chat.completions.create(
+                model="gpt-4-turbo",
+                messages=[{"role": "user", "content": review_prompt}],
+                temperature=0.3,
+                max_tokens=1200
+            )
+
+        final_report = review_response.choices[0].message.content.strip()
+
+        st.success("Final report ready!")
+        st.write(final_report)
+        st.download_button("Download Report", final_report, "market_report.txt")
 
         all_rows = worksheet.get_all_records()
         bcc_emails = [row["email"] for row in all_rows if product_choice in row.get("products", "") or (product_choice in ["Oranges", "Lemons", "Mandarins", "Pomelos", "Grapefruits"] and "Citrus" in row.get("products", ""))]
@@ -177,7 +202,7 @@ DATA TO USE:
             Please find below this week's update concerning the <b>{product_choice.lower()}</b> market.<br>
             Should you have any questions or wish to discuss planning or expectations, feel free to contact us.<br><br>
             ---<br>
-            <pre>{report}</pre><br>
+            <pre>{final_report}</pre><br>
             ---<br><br>
             Best regards,<br>
             <b>Schrijvershof Team</b><br><br>
@@ -196,7 +221,7 @@ Content-Type: text/html
             eml_bytes = eml_content.encode("utf-8")
             st.download_button("📩 Download Outlook Email (.eml)", data=eml_bytes, file_name="market_report.eml", mime="message/rfc822")
 
-            mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(report)}"
+            mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(final_report)}"
             st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
         else:
             st.warning("No email addresses found for this product.")
