@@ -109,20 +109,23 @@ if st.button("Generate Report"):
         "Highest Market Price": f"€ {highest_market_price:.2f}" if highest_market_price > 0 else "-",
     }
 
-    base_info = "\n".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
+    if all(v == "-" or not v for v in general_inputs.values()) and not st.session_state.segments and not extra_notes.strip():
+        st.warning("No report data entered. Please fill in some fields.")
+    else:
+        base_info = "\n".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
 
-    segment_info = ""
-    if st.session_state.segments:
-        segment_info = "\n\nMARKET SEGMENTS:\n"
-        for seg in st.session_state.segments:
-            segment_info += f"- {seg['variety']} from {seg['origin']}: {seg['note']}\n"
+        segment_info = ""
+        if st.session_state.segments:
+            segment_info = "\n\nMARKET SEGMENTS:\n"
+            for seg in st.session_state.segments:
+                segment_info += f"- {seg['variety']} from {seg['origin']}: {seg['note']}\n"
 
-    if extra_notes.strip():
-        base_info = f"GENERAL CONTEXT:\n{extra_notes.strip()}\n\n---\n\n" + base_info
+        if extra_notes.strip():
+            base_info = f"GENERAL CONTEXT:\n{extra_notes.strip()}\n\n---\n\n" + base_info
 
-    report_inputs = f"{segment_info}\n\n{base_info}"
+        report_inputs = f"{segment_info}\n\n{base_info}"
 
-    prompt = f'''
+        prompt = f'''
 You are assisting a Dutch fruit importing company in writing a weekly market update for overseas producers and exporters. These reports are used to inform and advise suppliers in countries like Brazil, Peru, and South Africa. The fruits are imported into Europe and sold mainly to service providers who handle ripening, packing, and delivery to retail.
 
 IMPORTANT:
@@ -135,61 +138,66 @@ IMPORTANT:
 - Any additional notes provided are general observations and should not be overly tied to the product (e.g., mangoes), unless it clearly is.
 - A change in origin is not absolute; multiple countries may still be in supply simultaneously.
 
+RULES:
+- Do not fabricate any data. Use only the fields that were actually filled in.
+- If all fields are empty or set to '-', respond with: "No data was provided. No report can be generated."
+- Do not assume product, origin, or market segments unless they were explicitly selected.
+
 STRUCTURE OF THE REPORT:
 1. Summary: Start with a clear overview of the current market situation based on all filled-in form fields (in order of appearance).
 2. Conclusion & Advice: End with a short, strategic conclusion and professional advice to the supplier about how to proceed.
 
 DATA TO USE:
 {report_inputs}
-    '''
+        '''
 
-    with st.spinner("Generating report..."):
-        response = openai.chat.completions.create(
-            model="gpt-4-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=1000
-        )
+        with st.spinner("Generating report..."):
+            response = openai.chat.completions.create(
+                model="gpt-4-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=1000
+            )
 
-    report = response.choices[0].message.content.strip()
-    st.success("Report generated!")
-    st.write(report)
-    st.download_button("Download Report", report, "market_report.txt")
+        report = response.choices[0].message.content.strip()
+        st.success("Report generated!")
+        st.write(report)
+        st.download_button("Download Report", report, "market_report.txt")
 
-    all_rows = worksheet.get_all_records()
-    bcc_emails = [row["email"] for row in all_rows if product_choice in row.get("products", "") or (product_choice in ["Oranges", "Lemons", "Mandarins", "Pomelos", "Grapefruits"] and "Citrus" in row.get("products", ""))]
+        all_rows = worksheet.get_all_records()
+        bcc_emails = [row["email"] for row in all_rows if product_choice in row.get("products", "") or (product_choice in ["Oranges", "Lemons", "Mandarins", "Pomelos", "Grapefruits"] and "Citrus" in row.get("products", ""))]
 
-    if bcc_emails:
-        bcc_string = ",".join(bcc_emails)
-        subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
-        html_body = f"""
-        <html>
-        <body>
-        <p>Dear Partner,<br><br>
-        Please find below this week's update concerning the <b>{product_choice.lower()}</b> market.<br>
-        Should you have any questions or wish to discuss planning or expectations, feel free to contact us.<br><br>
-        ---<br>
-        <pre>{report}</pre><br>
-        ---<br><br>
-        Best regards,<br>
-        <b>Schrijvershof Team</b><br><br>
-        <i>Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. This report is generated using artificial intelligence, based on data and insights provided by our product specialists. It may be freely shared or forwarded with others.</i>
-        </p>
-        </body>
-        </html>
-        """
+        if bcc_emails:
+            bcc_string = ",".join(bcc_emails)
+            subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
+            html_body = f"""
+            <html>
+            <body>
+            <p>Dear Partner,<br><br>
+            Please find below this week's update concerning the <b>{product_choice.lower()}</b> market.<br>
+            Should you have any questions or wish to discuss planning or expectations, feel free to contact us.<br><br>
+            ---<br>
+            <pre>{report}</pre><br>
+            ---<br><br>
+            Best regards,<br>
+            <b>Schrijvershof Team</b><br><br>
+            <i>Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. This report is generated using artificial intelligence, based on data and insights provided by our product specialists. It may be freely shared or forwarded with others.</i>
+            </p>
+            </body>
+            </html>
+            """
 
-        eml_content = f"""Subject: {subject}
+            eml_content = f"""Subject: {subject}
 BCC: {bcc_string}
 Content-Type: text/html
 
 {html_body}"""
 
-        eml_bytes = eml_content.encode("utf-8")
-        st.download_button("📩 Download Outlook Email (.eml)", data=eml_bytes, file_name="market_report.eml", mime="message/rfc822")
+            eml_bytes = eml_content.encode("utf-8")
+            st.download_button("📩 Download Outlook Email (.eml)", data=eml_bytes, file_name="market_report.eml", mime="message/rfc822")
 
-        mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(report)}"
-        st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
-    else:
-        st.warning("No email addresses found for this product.")
+            mailto_link = f"mailto:?bcc={bcc_string}&subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(report)}"
+            st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
+        else:
+            st.warning("No email addresses found for this product.")
 
