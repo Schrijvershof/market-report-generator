@@ -112,31 +112,18 @@ if st.button("Generate Report"):
         "Highest Market Price": f"€ {highest_market_price:.2f}" if highest_market_price > 0 else "-",
     }
 
-base_info = "\n".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
-".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
-
+    base_info = "\n".join([f"{k}: {v}" for k, v in general_inputs.items() if v and v != "-"])
 
     segment_info = ""
     if st.session_state.segments:
-        segment_info = "
-
-MARKET SEGMENTS:
-"
+        segment_info = "\n\nMARKET SEGMENTS:\n"
         for seg in st.session_state.segments:
-            segment_info += f"- {seg['variety']} from {seg['origin']}: {seg['note']}
-"
+            segment_info += f"- {seg['variety']} from {seg['origin']}: {seg['note']}\n"
 
     if extra_notes.strip():
-        base_info = f"GENERAL CONTEXT:
-{extra_notes.strip()}
+        base_info = f"GENERAL CONTEXT:\n{extra_notes.strip()}\n\n---\n\n" + base_info
 
----
-
-" + base_info
-
-    report_inputs = f"{segment_info}
-
-{base_info}"
+    report_inputs = f"{segment_info}\n\n{base_info}"
 
     prompt = f'''
 You are assisting a Dutch fruit importing company in writing a weekly market update for overseas producers and exporters. These reports are used to inform and advise suppliers in countries like Brazil, Peru, and South Africa. The fruits are imported into Europe and sold mainly to service providers who handle ripening, packing, and delivery to retail.
@@ -191,4 +178,3 @@ Disclaimer: This report is based on best available internal and external informa
         st.markdown(f"[📧 Send via Outlook]({mailto_link})", unsafe_allow_html=True)
     else:
         st.warning("No email addresses found for this product.")
-# die we nu verder zullen integreren met de segment-data
