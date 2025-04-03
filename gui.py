@@ -142,10 +142,12 @@ DATA:
     pdf = PDF()
     pdf.add_page()
     pdf.set_font("Helvetica", size=11)
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_font("Helvetica", size=11)
     for line in report.split("\n"):
-    if line.strip():
-        pdf.multi_cell(0, 8, line)
-
+        if line.strip():
+            pdf.multi_cell(0, 8, line)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf_bytes = pdf.output(dest='S').encode()
