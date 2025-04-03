@@ -128,25 +128,25 @@ DATA:
     class PDF(FPDF):
         def header(self):
             self.image("logo.png", 10, 8, 50)
-            self.set_font("Arial", 'B', 14)
-            self.cell(0, 10, f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}", ln=1, align="R")
+            self.set_font("Helvetica", 'B', 14)
+            self.cell(0, 10, f"Market Report - {product_choice} - {datetime.now().strftime('%d %B %Y')}", ln=1, align="R")
             self.ln(10)
 
         def footer(self):
             self.set_y(-30)
-            self.set_font("Arial", size=8)
+            self.set_font("Helvetica", size=8)
             self.multi_cell(0, 5, "Schrijvershof B.V. · Kwakscheweg 3 · 3261 LG Oud-Beijerland · The Netherlands\nphone +31 (0)186 643000 · internet www.schrijvershof.nl", align="C")
             self.set_y(-15)
             self.multi_cell(0, 5, "Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. It is generated using artificial intelligence, based on insights provided by our product specialists. It may be shared freely.", align="C")
 
     pdf = PDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=11)
+    pdf.set_font("Helvetica", size=11)
     for line in report.split("\n"):
         pdf.multi_cell(0, 8, line)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
-    pdf_bytes = pdf.output(dest='S').encode('utf-8')
+    pdf_bytes = pdf.output(dest='S').encode()
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
