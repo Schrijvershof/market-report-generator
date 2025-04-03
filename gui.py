@@ -151,13 +151,25 @@ DATA:
     pdf.add_page()
     pdf.set_font("Helvetica", size=11)
 
-    for paragraph in report.split("\n\n"):
-        clean_paragraph = clean_line(paragraph.replace("\n", " ").strip())
-        pdf.multi_cell(0, 8, clean_paragraph, align='J')
-        pdf.ln(4)
+    lines = report.splitlines()
+    paragraph = ""
+
+    for line in lines:
+        line = clean_line(line.strip())
+        if line == "":
+            if paragraph:
+                pdf.multi_cell(0, 8, paragraph.strip(), align='J')
+                pdf.ln(4)
+                paragraph = ""
+        else:
+            paragraph += " " + line
+
+    if paragraph:
+        pdf.multi_cell(0, 8, paragraph.strip(), align='J')
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf_bytes = pdf.output(dest='S')
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
+
