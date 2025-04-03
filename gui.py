@@ -8,7 +8,7 @@ import yaml
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 from config import OPENAI_API_KEY
-from fpdf import FPDF  # uit fpdf2
+from fpdf import FPDF
 import base64
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -146,7 +146,7 @@ DATA:
         pdf.multi_cell(0, 8, line)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
-    pdf_bytes = pdf.output(dest='S').encode('latin1')  ✅ in fpdf2 toegestaan
+    pdf_bytes = pdf.output(dest='S').encode('utf-8')
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
