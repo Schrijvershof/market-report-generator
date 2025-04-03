@@ -9,4 +9,4 @@ pyyaml
 weasyprint
 pdfkit
 reportlab
-fpdf
+fpdf2
