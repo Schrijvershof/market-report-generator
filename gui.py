@@ -31,7 +31,7 @@ st.markdown("### Market Segments")
 with st.form("segment_form"):
     col1, col2, col3 = st.columns(3)
     with col1:
-        variety = st.text_input("Variety/Color")
+        variety = st.selectbox("Variety/Color", opties["product_specificatie"])
     with col2:
         origin = st.selectbox("Origin", opties["landen_en_continenten"])
     with col3:
