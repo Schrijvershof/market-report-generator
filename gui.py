@@ -165,7 +165,9 @@ DATA:
             pdf.multi_cell(0, 8, line[5:], align='L')
         elif line.startswith("**") and line.endswith("**"):
             pdf.set_font("Helvetica", 'B', 11)
-            pdf.multi_cell(0, 8, line.replace("**", ""), align='J')
+            text = clean_line(line.replace("**", "").strip())
+            if text:
+                pdf.multi_cell(0, 8, text, align='J')
         elif line == "":
             if paragraph:
                 pdf.set_font("Helvetica", '', 11)
