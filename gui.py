@@ -144,7 +144,7 @@ DATA:
     pdf.set_font("Helvetica", size=11)
     for line in report.split("\n"):
         if line.strip():
-            safe_line = line.replace("-", "- ").replace("/", "/ ")
+            safe_line = line.replace("-", "- ").replace("/", "/ ").replace("_", "_ ")
             pdf.multi_cell(0, 8, safe_line)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
