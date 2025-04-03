@@ -150,7 +150,7 @@ DATA:
     for line in report.split("\n"):
         if line.strip():
             safe_line = clean_line(line)
-            pdf.multi_cell(0, 12, safe_line)
+            pdf.multi_cell(180, 12, safe_line)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf_bytes = pdf.output(dest='S').encode()
