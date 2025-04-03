@@ -151,12 +151,9 @@ DATA:
 
     # Gebruik duidelijkere formatting voor opbouw
     for paragraph in report.split("\n\n"):
-        lines = paragraph.strip().split("\n")
-        for line in lines:
-            if line.strip():
-                safe_line = clean_line(line)
-                pdf.multi_cell(180, 8, safe_line)
-        pdf.ln(4)
+    clean_paragraph = clean_line(paragraph.replace("\n", " ").strip())
+    pdf.multi_cell(180, 8, clean_paragraph)
+    pdf.ln(4)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf_bytes = pdf.output(dest='S')
