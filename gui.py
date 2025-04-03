@@ -146,27 +146,14 @@ DATA:
 
     pdf = PDF()
     pdf.set_auto_page_break(auto=True, margin=20)
+    pdf.set_left_margin(15)
+    pdf.set_right_margin(15)
     pdf.add_page()
     pdf.set_font("Helvetica", size=11)
 
     for paragraph in report.split("\n\n"):
-        lines = paragraph.split("\n")
-        for line in lines:
-            line = clean_line(line.strip())
-            if not line:
-                continue
-            if line.startswith("### "):
-                pdf.set_font("Helvetica", 'B', 14)
-                pdf.cell(0, 10, line.replace("### ", ""), ln=1)
-            elif line.startswith("#### "):
-                pdf.set_font("Helvetica", 'B', 12)
-                pdf.cell(0, 8, line.replace("#### ", ""), ln=1)
-            elif line.startswith("**") and line.endswith("**"):
-                pdf.set_font("Helvetica", 'B', 11)
-                pdf.multi_cell(180, 8, line.replace("**", ""))
-            else:
-                pdf.set_font("Helvetica", size=11)
-                pdf.multi_cell(180, 8, line)
+        clean_paragraph = clean_line(paragraph.replace("\n", " ").strip())
+        pdf.multi_cell(0, 8, clean_paragraph, align='J')
         pdf.ln(4)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
@@ -174,4 +161,3 @@ DATA:
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
-
