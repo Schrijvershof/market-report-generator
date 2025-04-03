@@ -178,14 +178,6 @@ DATA:
     if paragraph:
         pdf.set_font("Helvetica", '', 11)
         pdf.multi_cell(0, 8, paragraph.strip(), align='J')
-                pdf.multi_cell(0, 8, paragraph.strip(), align='J')
-                pdf.ln(4)
-                paragraph = ""
-        else:
-            paragraph += " " + line
-
-    if paragraph:
-        pdf.multi_cell(0, 8, paragraph.strip(), align='J')
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf_bytes = pdf.output(dest='S')
