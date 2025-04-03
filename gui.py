@@ -156,8 +156,28 @@ DATA:
 
     for line in lines:
         line = clean_line(line.strip())
-        if line == "":
+        if line.startswith("### "):
+            pdf.set_font("Helvetica", 'B', 14)
+            pdf.ln(4)
+            pdf.multi_cell(0, 10, line[4:], align='L')
+        elif line.startswith("#### "):
+            pdf.set_font("Helvetica", 'B', 12)
+            pdf.multi_cell(0, 8, line[5:], align='L')
+        elif line.startswith("**") and line.endswith("**"):
+            pdf.set_font("Helvetica", 'B', 11)
+            pdf.multi_cell(0, 8, line.replace("**", ""), align='J')
+        elif line == "":
             if paragraph:
+                pdf.set_font("Helvetica", '', 11)
+                pdf.multi_cell(0, 8, paragraph.strip(), align='J')
+                pdf.ln(4)
+                paragraph = ""
+        else:
+            paragraph += " " + line
+
+    if paragraph:
+        pdf.set_font("Helvetica", '', 11)
+        pdf.multi_cell(0, 8, paragraph.strip(), align='J')
                 pdf.multi_cell(0, 8, paragraph.strip(), align='J')
                 pdf.ln(4)
                 paragraph = ""
@@ -172,4 +192,3 @@ DATA:
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
-
