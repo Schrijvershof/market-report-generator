@@ -10,6 +10,7 @@ from datetime import datetime
 from config import OPENAI_API_KEY
 from fpdf import FPDF
 import base64
+import re
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
@@ -124,7 +125,6 @@ DATA:
     st.success("Report generated!")
     st.write(report)
 
-    # --- PDF Generatie ---
     class PDF(FPDF):
         def header(self):
             self.image("logo.png", 10, 8, 50)
@@ -139,12 +139,17 @@ DATA:
             self.set_y(-15)
             self.multi_cell(0, 5, "Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. It is generated using artificial intelligence, based on insights provided by our product specialists. It may be shared freely.", align="C")
 
+    def clean_line(line):
+        line = re.sub(r'[^\x00-\x7F]', '', line)
+        line = re.sub(r'[-_/]{10,}', '', line)
+        return line
+
     pdf = PDF()
     pdf.add_page()
     pdf.set_font("Helvetica", size=11)
     for line in report.split("\n"):
         if line.strip():
-            safe_line = line.replace("-", "- ").replace("/", "/ ").replace("_", "_ ")
+            safe_line = clean_line(line)
             pdf.multi_cell(0, 12, safe_line)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
