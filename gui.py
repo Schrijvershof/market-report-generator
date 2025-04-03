@@ -145,15 +145,22 @@ DATA:
         return line
 
     pdf = PDF()
+    pdf.set_auto_page_break(auto=True, margin=20)
     pdf.add_page()
     pdf.set_font("Helvetica", size=11)
-    for line in report.split("\n"):
-        if line.strip():
-            safe_line = clean_line(line)
-            pdf.multi_cell(180, 12, safe_line)
+
+    # Gebruik duidelijkere formatting voor opbouw
+    for paragraph in report.split("\n\n"):
+        lines = paragraph.strip().split("\n")
+        for line in lines:
+            if line.strip():
+                safe_line = clean_line(line)
+                pdf.multi_cell(180, 8, safe_line)
+        pdf.ln(4)
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf_bytes = pdf.output(dest='S')
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
+
