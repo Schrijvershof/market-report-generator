@@ -193,7 +193,11 @@ DATA:
 
     if paragraph:
         pdf.set_font("Helvetica", '', 11)
-        pdf.multi_cell(0, 8, paragraph.strip(), align='J')
+        text = clean_line(paragraph.strip())
+        if text and all(c.isprintable() for c in text):
+            if ' ' not in text and len(text) > 50:
+                text = re.sub(r'(.{40})(?=\S)', r'\1 ', text)
+            pdf.multi_cell(pdf.w - 30, 8, text, align='J')
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf_bytes = pdf.output(dest='S')
