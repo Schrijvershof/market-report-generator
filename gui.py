@@ -176,9 +176,9 @@ DATA:
             if paragraph:
                 pdf.set_font("Helvetica", '', 11)
                 text = clean_line(paragraph.strip())
-        if text and all(c.isprintable() for c in text):
-            pdf.multi_cell(0, 8, text, align='J')
-                pdf.ln(4)
+                if text and all(c.isprintable() for c in text):
+                    pdf.multi_cell(0, 8, text, align='J')
+                    pdf.ln(4)
                 paragraph = ""
         else:
             paragraph += " " + line
