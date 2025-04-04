@@ -162,7 +162,9 @@ DATA:
             pdf.multi_cell(0, 10, line[4:], align='L')
         elif line.startswith("#### "):
             pdf.set_font("Helvetica", 'B', 12)
-            pdf.multi_cell(0, 8, line[5:], align='L')
+            text = clean_line(line[5:].strip())
+            if text and all(c.isprintable() for c in text):
+                pdf.multi_cell(0, 8, text, align='L')
         elif line.startswith("**") and line.endswith("**"):
             pdf.set_font("Helvetica", 'B', 11)
             text = clean_line(line.replace("**", "").strip())
@@ -186,5 +188,4 @@ DATA:
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
-
 
