@@ -166,7 +166,7 @@ DATA:
         elif line.startswith("**") and line.endswith("**"):
             pdf.set_font("Helvetica", 'B', 11)
             text = clean_line(line.replace("**", "").strip())
-            if text:
+            if text and all(c.isprintable() for c in text):
                 pdf.multi_cell(0, 8, text, align='J')
         elif line == "":
             if paragraph:
@@ -186,4 +186,5 @@ DATA:
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
+
 
