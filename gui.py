@@ -163,21 +163,21 @@ DATA:
             if text and all(c.isprintable() for c in text):
                 if ' ' not in text and len(text) > 50:
                     text = re.sub(r'(.{40})', '\1 ', text)
-                pdf.multi_cell(pdf.w - 30, 10, text, align='L')
+                pdf.multi_cell(0, 10, text, align='L')
         elif line.startswith("#### "):
             pdf.set_font("Helvetica", 'B', 12)
             text = clean_line(line[5:].strip())
             if text and all(c.isprintable() for c in text):
                 if ' ' not in text and len(text) > 50:
                     text = re.sub(r'(.{40})', '\1 ', text)
-                pdf.multi_cell(pdf.w - 30, 8, text, align='L')
+                pdf.multi_cell(0, 8, text, align='L')
         elif line.startswith("**") and line.endswith("**"):
             pdf.set_font("Helvetica", 'B', 11)
             text = clean_line(line.replace("**", "").strip())
             if text and all(c.isprintable() for c in text):
                 if ' ' not in text and len(text) > 50:
                     text = re.sub(r'(.{40})', '\1 ', text)
-                pdf.multi_cell(pdf.w - 30, 8, text, align='J')
+                pdf.multi_cell(0, 8, text, align='J')
         elif line == "":
             if paragraph:
                 pdf.set_font("Helvetica", '', 11)
@@ -185,7 +185,7 @@ DATA:
                 if text and all(c.isprintable() for c in text):
                     if ' ' not in text and len(text) > 50:
                         text = re.sub(r'(.{40})', '\1 ', text)
-                    pdf.multi_cell(pdf.w - 30, 8, text, align='J')
+                    pdf.multi_cell(0, 8, text, align='J')
                     pdf.ln(4)
                 paragraph = ""
         else:
@@ -193,15 +193,10 @@ DATA:
 
     if paragraph:
         pdf.set_font("Helvetica", '', 11)
-        text = clean_line(paragraph.strip())
-        if text and all(c.isprintable() for c in text):
-            if ' ' not in text and len(text) > 50:
-                text = re.sub(r'(.{40})(?=\S)', r'\1 ', text)
-            pdf.multi_cell(pdf.w - 30, 8, text, align='J')
+        pdf.multi_cell(0, 8, paragraph.strip(), align='J')
 
     pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
     pdf_bytes = pdf.output(dest='S')
     b64 = base64.b64encode(pdf_bytes).decode()
     href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
     st.markdown(href, unsafe_allow_html=True)
-
