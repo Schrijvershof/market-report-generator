@@ -8,8 +8,6 @@ import yaml
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 from config import OPENAI_API_KEY
-from fpdf import FPDF
-import base64
 import re
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -125,79 +123,33 @@ DATA:
     st.success("Report generated!")
     st.write(report)
 
-    class PDF(FPDF):
-        def header(self):
-            self.image("logo.png", 10, 8, 50)
-            self.set_font("Helvetica", 'B', 14)
-            self.cell(0, 10, f"Market Report - {product_choice} - {datetime.now().strftime('%d %B %Y')}", ln=1, align="R")
-            self.ln(10)
+    disclaimer = """
 
-        def footer(self):
-            self.set_y(-30)
-            self.set_font("Helvetica", size=8)
-            self.multi_cell(0, 5, "Schrijvershof B.V. · Kwakscheweg 3 · 3261 LG Oud-Beijerland · The Netherlands\nphone +31 (0)186 643000 · internet www.schrijvershof.nl", align="C")
-            self.set_y(-15)
-            self.multi_cell(0, 5, "Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. It is generated using artificial intelligence, based on insights provided by our product specialists. It may be shared freely.", align="C")
+---
+_Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. It is generated using artificial intelligence, based on insights provided by our product specialists._
 
-    def clean_line(line):
-        line = re.sub(r'[^\x00-\x7F]', '', line)
-        line = re.sub(r'[-_/]{10,}', '', line)
-        return line
+Want to receive these reports automatically? [Subscribe here](https://forms.gle/VV1o1sZTuu1AqbdD8)
 
-    pdf = PDF()
-    pdf.set_auto_page_break(auto=True, margin=20)
-    pdf.set_left_margin(15)
-    pdf.set_right_margin(15)
-    pdf.add_page()
-    pdf.set_font("Helvetica", size=11)
+![logo](https://www.schrijvershof.nl/assets/images/schrijvershof-logo.png)
+Schrijvershof B.V. · Kwakscheweg 3 · 3261 LG Oud-Beijerland · The Netherlands  
+📞 +31 (0)186 643000 · 🌐 [www.schrijvershof.nl](https://www.schrijvershof.nl)
+"""
 
-    lines = report.splitlines()
-    paragraph = ""
+    mail_body = f"""
+    <html>
+    <body>
+    <p>{report.replace('\n', '<br>')}</p>
+    <br><hr>
+    <p>{disclaimer}</p>
+    </body>
+    </html>
+    """
 
-    for line in lines:
-        line = clean_line(line.strip())
-        if line.startswith("### "):
-            pdf.set_font("Helvetica", 'B', 14)
-            pdf.ln(4)
-            text = clean_line(line[4:].strip())
-            if text and all(c.isprintable() for c in text):
-                if ' ' not in text and len(text) > 50:
-                    text = re.sub(r'(.{40})', '\1 ', text)
-                pdf.multi_cell(0, 10, text, align='L')
-        elif line.startswith("#### "):
-            pdf.set_font("Helvetica", 'B', 12)
-            text = clean_line(line[5:].strip())
-            if text and all(c.isprintable() for c in text):
-                if ' ' not in text and len(text) > 50:
-                    text = re.sub(r'(.{40})', '\1 ', text)
-                pdf.multi_cell(0, 8, text, align='L')
-        elif line.startswith("**") and line.endswith("**"):
-            pdf.set_font("Helvetica", 'B', 11)
-            text = clean_line(line.replace("**", "").strip())
-            if text and all(c.isprintable() for c in text):
-                if ' ' not in text and len(text) > 50:
-                    text = re.sub(r'(.{40})', '\1 ', text)
-                pdf.multi_cell(0, 8, text, align='J')
-        elif line == "":
-            if paragraph:
-                pdf.set_font("Helvetica", '', 11)
-                text = clean_line(paragraph.strip())
-                if text and all(c.isprintable() for c in text):
-                    if ' ' not in text and len(text) > 50:
-                        text = re.sub(r'(.{40})', '\1 ', text)
-                    pdf.multi_cell(0, 8, text, align='J')
-                    pdf.ln(4)
-                paragraph = ""
-        else:
-            paragraph += " " + line
+    to = ""
+    subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
+    bcc_list = worksheet.col_values(1)
+    bcc = ','.join([mail for mail in bcc_list if product_choice.lower() in mail.lower() or (product_choice.lower() in ["mandarins", "oranges", "grapefruits", "lemons", "pomelo"] and any(c in mail.lower() for c in ["citrus"]))])
 
-    if paragraph:
-        pdf.set_font("Helvetica", '', 11)
-        pdf.multi_cell(0, 8, paragraph.strip(), align='J')
+    mailto_link = f"mailto:{to}?subject={urllib.parse.quote(subject)}&bcc={urllib.parse.quote(bcc)}&body={urllib.parse.quote(report)}"
 
-    pdf_output = f"report_{product_choice}_{datetime.now().strftime('%Y%m%d')}.pdf"
-    pdf_bytes = pdf.output(dest='S')
-    b64 = base64.b64encode(pdf_bytes).decode()
-    href = f'<a href="data:application/octet-stream;base64,{b64}" download="{pdf_output}">📄 Download PDF Report</a>'
-    st.markdown(href, unsafe_allow_html=True)
-
+    st.markdown(f'<a href="{mailto_link}" target="_blank">📧 Open in Outlook</a>', unsafe_allow_html=True)
