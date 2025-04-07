@@ -145,6 +145,8 @@ DATA:
     <body style="font-family: Arial, sans-serif; font-size: 12pt; color: #333;">
     <h1 style="color: #003087; font-size: 16pt;">Market Report</h1>
     <div style="margin-top: 20px;">
+        {safe_report.replace("
+", "<br>")}
         {safe_report.replace('
 ', '<br>')}
         {safe_report.replace('
@@ -203,3 +205,4 @@ try:
     mail.Display()
 except Exception as e:
     st.info("📭 Outlook kon lokaal niet geopend worden. Zorg dat Outlook beschikbaar is en pywin32 is geïnstalleerd.")
+
