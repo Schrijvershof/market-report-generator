@@ -152,11 +152,20 @@ DATA:
     subject = f"Market Report - {product_choice} - {datetime.now().strftime('%d %B %Y')}"
 
     eml_content = f"""
-Content-Type: text/html; charset=UTF-8
 MIME-Version: 1.0
 Subject: {subject}
+Content-Type: multipart/alternative; boundary="BOUNDARY"
+
+--BOUNDARY
+Content-Type: text/plain; charset=UTF-8
+
+This is a market report generated for {product_choice}. Please open this email in an HTML-compatible viewer.
+
+--BOUNDARY
+Content-Type: text/html; charset=UTF-8
 
 {mail_html}
+--BOUNDARY--
 """
 
     st.download_button(
