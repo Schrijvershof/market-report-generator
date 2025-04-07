@@ -156,6 +156,9 @@ Subject: {subject}
 {mail_html}
 """
 
-    b64_eml = base64.b64encode(eml_content.encode('utf-8')).decode()
-    href = f'<a download="MarketReport_{product_choice}.eml" href="data:message/rfc822;base64,{b64_eml}">📧 Download Outlook Email</a>'
-    st.markdown(href, unsafe_allow_html=True)
+    st.download_button(
+    label="📧 Download Outlook Email",
+    data=eml_content,
+    file_name=f"MarketReport_{product_choice}.eml",
+    mime="message/rfc822"
+)
