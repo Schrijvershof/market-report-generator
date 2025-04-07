@@ -10,3 +10,4 @@ weasyprint
 pdfkit
 reportlab
 fpdf2
+pywin32
