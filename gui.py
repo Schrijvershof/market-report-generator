@@ -146,19 +146,7 @@ DATA:
     </html>
     """
 
-    subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
+    subject = f"Market Report - {product_choice} - {datetime.now().strftime('%d %B %Y')}"
 
-    eml_content = f"""
-Content-Type: text/html; charset=UTF-8
-MIME-Version: 1.0
-Subject: {subject}
-
-{mail_html}
-"""
-
-    st.download_button(
-    label="📧 Download Outlook Email",
-    data=eml_content,
-    file_name=f"MarketReport_{product_choice}.eml",
-    mime="message/rfc822"
-)
+    # Strip unicode from disclaimer and report
+    safe_report = re.sub(r'[^
