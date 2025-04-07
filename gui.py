@@ -9,6 +9,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 from config import OPENAI_API_KEY
 import re
+import base64
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
@@ -124,32 +125,37 @@ DATA:
     st.write(report)
 
     disclaimer = """
-
----
-_Disclaimer: This report is based on best available internal and external information. No rights can be derived from its contents. It is generated using artificial intelligence, based on insights provided by our product specialists._
-
-Want to receive these reports automatically? [Subscribe here](https://forms.gle/VV1o1sZTuu1AqbdD8)
-
-![logo](https://www.schrijvershof.nl/assets/images/schrijvershof-logo.png)
-Schrijvershof B.V. · Kwakscheweg 3 · 3261 LG Oud-Beijerland · The Netherlands  
-📞 +31 (0)186 643000 · 🌐 [www.schrijvershof.nl](https://www.schrijvershof.nl)
+<hr>
+<small>
+<p><em>This report is based on best available internal and external information. No rights can be derived from its contents. It is generated using artificial intelligence, based on insights provided by our product specialists.</em></p>
+<p>Want to receive these reports automatically? <a href='https://forms.gle/VV1o1sZTuu1AqbdD8'>Subscribe here</a></p>
+<p>
+  <img src='https://www.schrijvershof.nl/assets/images/schrijvershof-logo.png' width='200'><br>
+  Schrijvershof B.V. · Kwakscheweg 3 · 3261 LG Oud-Beijerland · The Netherlands<br>
+  📞 +31 (0)186 643000 · 🌐 <a href='https://www.schrijvershof.nl'>www.schrijvershof.nl</a>
+</p>
+</small>
 """
 
-    mail_body = f"""
+    mail_html = f"""
     <html>
     <body>
     <p>{report.replace('\n', '<br>')}</p>
-    <br><hr>
-    <p>{disclaimer}</p>
+    {disclaimer}
     </body>
     </html>
     """
 
-    to = ""
     subject = f"Market Report – {product_choice} – {datetime.now().strftime('%d %B %Y')}"
-    bcc_list = worksheet.col_values(1)
-    bcc = ','.join([mail for mail in bcc_list if product_choice.lower() in mail.lower() or (product_choice.lower() in ["mandarins", "oranges", "grapefruits", "lemons", "pomelo"] and any(c in mail.lower() for c in ["citrus"]))])
 
-    mailto_link = f"mailto:{to}?subject={urllib.parse.quote(subject)}&bcc={urllib.parse.quote(bcc)}&body={urllib.parse.quote(report)}"
+    eml_content = f"""
+Content-Type: text/html; charset=UTF-8
+MIME-Version: 1.0
+Subject: {subject}
 
-    st.markdown(f'<a href="{mailto_link}" target="_blank">📧 Open in Outlook</a>', unsafe_allow_html=True)
+{mail_html}
+"""
+
+    b64_eml = base64.b64encode(eml_content.encode('utf-8')).decode()
+    href = f'<a download="MarketReport_{product_choice}.eml" href="data:message/rfc822;base64,{b64_eml}">📧 Download Outlook Email</a>'
+    st.markdown(href, unsafe_allow_html=True)
