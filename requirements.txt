@@ -1,13 +1,8 @@
 pandas
 openai
-office365-rest-python-client
 matplotlib
 openpyxl
 gspread
 oauth2client
 pyyaml
-weasyprint
-pdfkit
-reportlab
-fpdf2
 pywin32; platform_system == "Windows"
