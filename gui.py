@@ -131,22 +131,37 @@ DATA:
 <p>Want to receive these reports automatically? <a href='https://forms.gle/VV1o1sZTuu1AqbdD8'>Subscribe here</a></p>
 <p>
   <img src='https://www.schrijvershof.nl/assets/images/schrijvershof-logo.png' width='200'><br>
-  Schrijvershof B.V. · Kwakscheweg 3 · 3261 LG Oud-Beijerland · The Netherlands<br>
-  📞 +31 (0)186 643000 · 🌐 <a href='https://www.schrijvershof.nl'>www.schrijvershof.nl</a>
+  Schrijvershof B.V. - Kwakscheweg 3 - 3261 LG Oud-Beijerland - The Netherlands<br>
+  Tel: +31 (0)186 643000 - Website: <a href='https://www.schrijvershof.nl'>www.schrijvershof.nl</a>
 </p>
 </small>
 """
 
+    safe_report = re.sub(r'[^\x00-\x7F]+', '', report)
+    safe_disclaimer = re.sub(r'[^\x00-\x7F]+', '', disclaimer)
+
     mail_html = f"""
     <html>
     <body>
-    <p>{report.replace('\n', '<br>')}</p>
-    {disclaimer}
+    <p>{safe_report.replace('\n', '<br>')}</p>
+    {safe_disclaimer}
     </body>
     </html>
     """
 
     subject = f"Market Report - {product_choice} - {datetime.now().strftime('%d %B %Y')}"
 
-    # Strip unicode from disclaimer and report
-    safe_report = re.sub(r'[^
+    eml_content = f"""
+Content-Type: text/html; charset=UTF-8
+MIME-Version: 1.0
+Subject: {subject}
+
+{mail_html}
+"""
+
+    st.download_button(
+        label="📧 Download Outlook Email",
+        data=eml_content,
+        file_name=f"MarketReport_{product_choice}.eml",
+        mime="message/rfc822"
+    )
