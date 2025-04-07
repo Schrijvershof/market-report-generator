@@ -142,9 +142,25 @@ DATA:
 
     mail_html = f"""
     <html>
-    <body>
-    <p>{safe_report.replace('\n', '<br>')}</p>
-    {safe_disclaimer}
+    <body style="font-family: Arial, sans-serif; font-size: 12pt; color: #333;">
+    <h1 style="color: #003087; font-size: 16pt;">Market Report</h1>
+    <div style="margin-top: 20px;">
+        {safe_report.replace('
+', '<br>')}
+    </div>
+    <hr style="border: 1px solid #003087; margin-top: 30px;">
+    <div style="font-size: 10pt;">
+        <p><strong style="color: #003087;">Disclaimer and Additional Information</strong></p>
+        <p>No rights or liabilities can be derived from the information provided in this report by Schrijvershof. The information is intended for general guidance only and should not be considered as binding advice or a guarantee of market conditions.</p>
+        <p>This report is generated using artificial intelligence, based on data and insights provided by our product specialists.</p>
+        <p>This is a complimentary weekly report. To subscribe, please <a href="mailto:s.meijer@schrijvershof.nl?subject=Subscription%20to%20Weekly%20Market%20Report&body=Full%20Name:%0D%0ACompany%20Name:%0D%0AEmail:%0D%0APreferred%20Product:%20">click here</a>.</p>
+        <p>
+          <img src='https://www.schrijvershof.nl/assets/images/schrijvershof-logo.png' width='200'><br>
+          <strong>Schrijvershof B.V.</strong><br>
+          Kwakscheweg 3 · 3261 LG Oud-Beijerland · The Netherlands<br>
+          Tel: +31 (0)186 643000 · <a href='https://www.schrijvershof.nl'>www.schrijvershof.nl</a>
+        </p>
+    </div>
     </body>
     </html>
     """
@@ -169,8 +185,19 @@ Content-Type: text/html; charset=UTF-8
 """
 
     st.download_button(
-        label="📧 Download Outlook Email",
-        data=eml_content,
-        file_name=f"MarketReport_{product_choice}.eml",
-        mime="message/rfc822"
-    )
+    label="📧 Download Outlook Email",
+    data=eml_content,
+    file_name=f"MarketReport_{product_choice}.eml",
+    mime="message/rfc822"
+)
+
+# OPTIONAL: Local Outlook launch with pywin32 (only works on Windows)
+try:
+    import win32com.client
+    outlook = win32com.client.Dispatch("Outlook.Application")
+    mail = outlook.CreateItem(0)
+    mail.Subject = subject
+    mail.HTMLBody = mail_html
+    mail.Display()
+except Exception as e:
+    st.info("📭 Outlook kon lokaal niet geopend worden. Zorg dat Outlook beschikbaar is en pywin32 is geïnstalleerd.")
