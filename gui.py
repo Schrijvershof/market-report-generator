@@ -147,6 +147,8 @@ DATA:
     <div style="margin-top: 20px;">
         {safe_report.replace('
 ', '<br>')}
+        {safe_report.replace('
+', '<br>')}
     </div>
     <hr style="border: 1px solid #003087; margin-top: 30px;">
     <div style="font-size: 10pt;">
